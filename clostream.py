@@ -5,6 +5,7 @@ inspired from
 """
 from pyroaring import BitMap
 
+
 class ItemSet(frozenset):
     def __new__(cls, iterable, support):
         return frozenset.__new__(cls, iterable)
@@ -16,11 +17,16 @@ class ItemSet(frozenset):
         return str(set(self)) + ' : ' + repr(self.support)
 
 
+def default_fiter_fn(itemset):
+    return len(itemset) > 1
+
+
 class CloStream():
-    def __init__(self):
+    def __init__(self, filter_fn=default_fiter_fn):
         self.closed_table = [ItemSet([], 0)]
         self.cid_list_map = dict()
         self.n_transactions = 0
+        self.filter_fn = filter_fn
 
     def _phase_1(self, transaction):
         temp_table = {transaction: 0}
@@ -49,6 +55,8 @@ class CloStream():
 
             if entry == ctc:
                 ctc.support += 1
+            elif not self.filter_fn(entry):
+                continue
             else:
                 self.closed_table.append(ItemSet(entry, ctc.support + 1))
                 # yield entry
