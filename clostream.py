@@ -3,10 +3,9 @@ Implementation for CloStream Algorithm
 inspired from
 `https://github.com/matfax/.../spmf/algorithms/frequentpatterns/clostream/AlgoCloSteam.java`
 """
-
+from pyroaring import BitMap
 
 class ItemSet(frozenset):
-    # TODO : reove this and store support as the second value of a pair
     def __new__(cls, iterable, support):
         return frozenset.__new__(cls, iterable)
 
@@ -25,8 +24,8 @@ class CloStream():
 
     def _phase_1(self, transaction):
         temp_table = {transaction: 0}
-        # TODO : closure ids can be retrieved via Roaring BitMaps
-        closed_ids = set.union(*(self.cid_list_map.get(item, set()) for item in transaction))
+
+        closed_ids = BitMap.union(*(self.cid_list_map.get(item, BitMap()) for item in transaction))
 
         for closed_id in closed_ids:
             cti = self.closed_table[closed_id]
@@ -54,7 +53,7 @@ class CloStream():
                 self.closed_table.append(ItemSet(entry, ctc.support + 1))
                 # yield entry
                 for item in entry:
-                    cid_set = self.cid_list_map.get(item, set())
+                    cid_set = self.cid_list_map.get(item, BitMap())
                     if not cid_set:
                         self.cid_list_map[item] = cid_set
 

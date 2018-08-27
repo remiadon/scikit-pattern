@@ -1,4 +1,5 @@
 from clostream import CloStream, ItemSet
+from pyroaring import BitMap
 from random import shuffle
 
 table_1 = ['CD', 'AB', 'ABC', 'ABC', 'ACD']
@@ -16,10 +17,10 @@ table_2 = [
 ]
 
 table_3 = {
-    'A': {2, 3, 5, 6, 7},
-    'B': {2, 3},
-    'C': {1, 3, 4, 5, 7},
-    'D': {1, 5},
+    'A': BitMap({2, 3, 5, 6, 7}),
+    'B': BitMap({2, 3}),
+    'C': BitMap({1, 3, 4, 5, 7}),
+    'D': BitMap({1, 5}),
 }
 
 table_4 = {
@@ -42,10 +43,10 @@ table_5 = [
 ]
 
 table_6 = {
-    'A': {2, 3, 5, 6, 7},
-    'B': {2, 3, 8, 9},
-    'C': {1, 3, 4, 5, 7, 9},
-    'D': {1, 5},
+    'A': BitMap({2, 3, 5, 6, 7}),
+    'B': BitMap({2, 3, 8, 9}),
+    'C': BitMap({1, 3, 4, 5, 7, 9}),
+    'D': BitMap({1, 5}),
 }
 
 t_6 = frozenset('BC')
@@ -77,7 +78,7 @@ def test_phase_2_no_temp_table_from_phase_1():
     cs._phase_2(temp_table)
 
     assert cs.closed_table == [ItemSet([], 0), ItemSet('CD', 1)]
-    assert cs.cid_list_map == dict(C={1}, D={1})
+    assert cs.cid_list_map == dict(C=BitMap({1}), D=BitMap({1}))
 
 
 def test_phase_2_temp_table_from_phase_1():
