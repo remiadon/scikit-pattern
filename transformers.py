@@ -1,6 +1,8 @@
 from collections import defaultdict
 from roaringbitmap import RoaringBitmap
 from sklearn.externals import joblib
+from sortedcontainers import SortedDict
+from collections import Callable
 
 import pandas as pd
 
@@ -11,6 +13,33 @@ def check_df_or_series(fn, *args, **kwargs):
             raise ValueError(f'{obj} should be either an instance of pd.DataFrame or pd.Series')
         return fn(obj, *args, **kwargs)
     return wrapper
+
+
+class SortedDefaultDict(SortedDict):
+    def __init__(self, default_factory=None, *a, **kw):
+        if (default_factory is not None and not isinstance(default_factory, Callable)):
+            raise TypeError('first argument must be callable')
+        super(SortedDefaultDict, self).__init__(self, *a, **kw)
+        self.default_factory = default_factory
+        
+    def __getitem__(self, key):
+        try:
+            return SortedDict.__getitem__(self, key)
+        except KeyError:
+            return self.__missing__(key)
+ 
+    def __missing__(self, key):
+        if self.default_factory is None:
+            raise KeyError(key)
+        self[key] = value = self.default_factory()
+        return value
+
+    def trim(self, min_supp):
+        # TODO every call to discard is O(log(n)), we can surely do better
+        keys_to_discard = {k for k, v in self.items() if len(v) < min_supp}
+        for key in keys_to_discard:
+            del self[key]
+        keys_to_discard.clear()
 
 
 class TIDLister(defaultdict):
@@ -44,7 +73,7 @@ class TIDLister(defaultdict):
         return self
 
     def trim(self, min_supp):
-        keys = {k for k,v in self.items() if len(v) < min_supp}
+        keys = {k for k, v in self.items() if len(v) < min_supp}
         for k in keys:
             del self[k]
         keys.clear()
