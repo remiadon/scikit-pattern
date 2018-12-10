@@ -1,4 +1,3 @@
-from roaringbitmap import RoaringBitmap
 from transformers import TIDLister
 from sklearn.externals.joblib import Parallel, delayed  # TODO from skpattern.externals
 import itertools
@@ -32,8 +31,12 @@ class LCM(object):
 
     def discover_yield(self):
         self.item_to_tids.trim(self.min_support)
-        for key, key_idxs in self.item_to_tids.items():
-            yield from self._inner(frozenset(), key_idxs, key, self.item_to_tids.keys())
+        criteria = lambda k: (len(self.item_to_tids[k]), k)
+        sorted_keys = sorted(self.item_to_tids.keys(), key=criteria)
+        for idx, key in enumerate(sorted_keys):
+            key_idxs = self.item_to_tids[key]
+            scope_keys = set(sorted_keys[idx:])
+            yield from self._inner(frozenset(), key_idxs, key, scope_keys, self.item_to_tids.keys())
 
     def discover(self):
         data = filter(self.filter_fn, self.discover_yield())
@@ -54,11 +57,10 @@ class LCM(object):
     def _format(self, p_prime, p_idxs):
         return p_prime, len(p_idxs)
 
-    #@profile
-    def _inner(self, p, p_idxs, limit, keys):
+    def _inner(self, p, p_idxs, limit, scope_keys, keys):
         # CDB = project and reduceDB w.r.t.P and limit
         keys = keys - p
-        cp = {k for k in keys if p_idxs.issubset(self.item_to_tids[k])}
+        cp = {k for k in scope_keys if p_idxs.issubset(self.item_to_tids[k])}
 
         max_k = max(cp, default=0)
         if max_k and max_k <= limit:
@@ -73,7 +75,7 @@ class LCM(object):
                 if new_limit < limit:
                     if not new_tids:
                         new_tids = {item: p_idxs.intersection(self.item_to_tids[item]) for item in new_lens.keys()}
-                    yield from self._inner(p_prime, new_tids[new_limit], new_limit, new_lens.keys())
+                    yield from self._inner(p_prime, new_tids[new_limit], new_limit, new_lens.keys(), new_lens.keys())
 
 
             new_tids.clear()

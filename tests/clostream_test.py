@@ -1,4 +1,4 @@
-from clostream import CloStream
+from src.clostream import CloStream
 import pandas as pd
 from pyroaring import BitMap
 from random import shuffle

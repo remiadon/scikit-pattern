@@ -7,16 +7,6 @@ import pandas as pd
 from pyroaring import BitMap
 from copy import deepcopy
 
-class ItemSet(frozenset):
-    def __new__(cls, iterable, support):
-        return frozenset.__new__(cls, iterable)
-
-    def __init__(self, iterable, support):
-        self.support = support
-
-    def __repr__(self):
-        return str(set(self)) + ' : ' + repr(self.support)
-
 
 def default_fiter_fn(itemset):
     return len(itemset) > 1
@@ -94,10 +84,8 @@ class CloStream():
 
         return self
 
-    def get_closed_itemsets(self):
-        return self.closed_df[:1]
-
-    __call__ = get_closed_itemsets
+    def discover(self):
+        return self.closed_df[1:]
 
 
 class TIDCloStream(CloStream):
