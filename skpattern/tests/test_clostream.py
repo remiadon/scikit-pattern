@@ -1,6 +1,6 @@
-from src.clostream import CloStream
+from skpattern import CloStream
 import pandas as pd
-from pyroaring import BitMap
+from roaringbitmap import RoaringBitmap
 from random import shuffle
 
 TABLE_1 = ['CD', 'AB', 'ABC', 'ABC', 'ACD']
@@ -20,10 +20,10 @@ TABLE_2 = [
 TABLE_2 = pd.DataFrame(TABLE_2, columns=['itemset', 'support'])
 
 TABLE_3 = {
-    'A': BitMap({2, 3, 5, 6, 7}),
-    'B': BitMap({2, 3}),
-    'C': BitMap({1, 3, 4, 5, 7}),
-    'D': BitMap({1, 5}),
+    'A': RoaringBitmap({2, 3, 5, 6, 7}),
+    'B': RoaringBitmap({2, 3}),
+    'C': RoaringBitmap({1, 3, 4, 5, 7}),
+    'D': RoaringBitmap({1, 5}),
 }
 
 TABLE_4 = {
@@ -48,10 +48,10 @@ TABLE_5 = [
 TABLE_5 = pd.DataFrame(TABLE_5, columns=['itemset', 'support'])
 
 TABLE_6 = {
-    'A': BitMap({2, 3, 5, 6, 7}),
-    'B': BitMap({2, 3, 8, 9}),
-    'C': BitMap({1, 3, 4, 5, 7, 9}),
-    'D': BitMap({1, 5}),
+    'A': RoaringBitmap({2, 3, 5, 6, 7}),
+    'B': RoaringBitmap({2, 3, 8, 9}),
+    'C': RoaringBitmap({1, 3, 4, 5, 7, 9}),
+    'D': RoaringBitmap({1, 5}),
 }
 
 t_6 = frozenset('BC')
@@ -87,7 +87,7 @@ def test_phase_2_no_temp_table_from_phase_1():
     cs._phase_2(temp_table)
 
     assert cs.closed_df.values.tolist() == [[frozenset(), 0], [frozenset('CD'), 1]]
-    assert cs.cid_list_map == dict(C=BitMap([1]), D=BitMap([1]))
+    assert cs.cid_list_map == dict(C=RoaringBitmap([1]), D=RoaringBitmap([1]))
 
 
 def test_phase_2_temp_table_from_phase_1():
@@ -147,3 +147,6 @@ def test_filter_as_arg_equivalent_to_post_process_filter():
         cs_filter_closed_df = cs_filter.closed_df[cs_filter.closed_df.itemset != frozenset()]
         post_filtered_closed_df = post_filtered_closed_df[post_filtered_closed_df.itemset != frozenset()]
         assert pd.np.array_equal(post_filtered_closed_df.values, cs_filter_closed_df.values)
+
+
+# TODO : test for TIDClostream

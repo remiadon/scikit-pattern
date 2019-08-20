@@ -3,14 +3,6 @@
 .ipynb_checkpoints/
 __pycache__/
 .DS_Store
-*.c
-*.cpp
-*.html
-*.so
-roaringbitmap/
-.pytest_cache/
-build/
-*.lprof
-*.log
-*.html
+.vscode/
+.gitignore
 
