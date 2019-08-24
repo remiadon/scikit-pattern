@@ -37,15 +37,6 @@ class LCM(object):
         data = self.discover_yield()
         return pd.DataFrame.from_records(data=data, columns=['itemset', self.extra_col])
 
-    def get_new_lens(self, p_idxs, keys, p_prime):
-        new_keys = keys - p_prime
-        new_lens = set()
-        for item in new_keys:
-            inter_len = p_idxs.intersection_len(self.item_to_tids[item])
-            if inter_len >= self.min_support:
-                new_lens.add(item)
-        return new_lens
-
     def _format_with_tids(self, p_prime, p_idxs):
         return p_prime, p_idxs
 
@@ -84,7 +75,3 @@ class LCM(object):
             new_tids.clear()
             #new_scope_keys.clear()
         cp.clear()
-
-
-class LCM_max(LCM):
-    pass
