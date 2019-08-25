@@ -59,10 +59,9 @@ class LCM(object):
         max_k = max(cp, default=0)
         if max_k and max_k <= limit:
             p_prime = p.union(cp)
-            new_scope_keys = self.get_new_scope_keys(keys - p_prime, p_idxs)
-
             yield self.format(p_prime, p_idxs)
 
+            new_scope_keys = self.get_new_scope_keys(keys - p_prime, p_idxs)
             new_tids = dict()
 
             for new_limit in new_scope_keys:
@@ -73,5 +72,5 @@ class LCM(object):
 
 
             new_tids.clear()
-            #new_scope_keys.clear()
+            new_scope_keys.clear()
         cp.clear()
