@@ -27,10 +27,10 @@ class LCM(object):
 
     def discover_yield(self):
         sorted_keys = sorted(self.item_to_tids.keys())
+        scope_keys = self.item_to_tids.keys()
         for idx, key in enumerate(sorted_keys):
             key_idxs = self.item_to_tids[key]
             if len(key_idxs) >= self.min_support:
-                scope_keys = self.item_to_tids.keys()
                 yield from self._inner(frozenset(), key_idxs, key, scope_keys)
 
     def discover(self):
@@ -52,7 +52,6 @@ class LCM(object):
         return new_scope_keys
 
     def _inner(self, p, p_idxs, limit, scope_keys):
-        # CDB = project and reduceDB w.r.t.P and limit
         keys = scope_keys - p
         cp = {k for k in keys if p_idxs.issubset(self.item_to_tids[k])}
 
@@ -62,15 +61,12 @@ class LCM(object):
             yield self.format(p_prime, p_idxs)
 
             new_scope_keys = self.get_new_scope_keys(keys - p_prime, p_idxs)
-            new_tids = dict()
 
             for new_limit in new_scope_keys:
                 if new_limit < limit:
-                    if not new_tids:
-                        new_tids = {item: p_idxs.intersection(self.item_to_tids[item]) for item in new_scope_keys}
-                    yield from self._inner(p_prime, new_tids[new_limit], new_limit, new_scope_keys)
+                    new_pidxs = p_idxs.intersection(self.item_to_tids[new_limit])
+                    yield from self._inner(p_prime, new_pidxs, new_limit, new_scope_keys)
 
-
-            new_tids.clear()
             new_scope_keys.clear()
+
         cp.clear()
