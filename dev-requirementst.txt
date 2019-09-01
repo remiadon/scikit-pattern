@@ -1,0 +1,7 @@
+flit
+coverage
+pytest
+pytest-cov
+isort
+ipdb
+codecov
